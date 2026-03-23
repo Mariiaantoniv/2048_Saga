@@ -121,8 +121,8 @@ class Game {
     });
 
     if (emptyCell.length > 0) {
-      const randomCell =
-        emptyCell[Math.floor(Math.random() * emptyCell.length)];
+      const randomCell
+        = emptyCell[Math.floor(Math.random() * emptyCell.length)];
 
       this.state[randomCell[0]][randomCell[1]] = Math.random() < 0.9 ? 2 : 4;
     }
@@ -160,8 +160,8 @@ class Game {
     const canMerge = this.state.some((row, rowIndex) => {
       return row.some((cell, cellIndex) => {
         return (
-          (cellIndex < 3 && cell === row[cellIndex + 1]) ||
-          (rowIndex < 3 && cell === this.state[rowIndex + 1][cellIndex])
+          (cellIndex < 3 && cell === row[cellIndex + 1])
+          || (rowIndex < 3 && cell === this.state[rowIndex + 1][cellIndex])
         );
       });
     });
