@@ -1,18 +1,26 @@
 'use strict';
 
+import {
+  GRID_SIZE,
+  INITIAL_STATE,
+  TARGET_TILE,
+  GAME_STATUS,
+  KEYBOARD
+} from './constants.js';
+
+
 // Uncomment the next lines to use your game instance in the browser
 /*  const Game = require('../modules/Game.class');
  const game = new Game(); */
 
 class Game {
   constructor(
-    initialState = Array(4)
-      .fill(null)
-      .map(() => Array(4).fill(0)),
+    initialState = INITIAL_STATE,
   ) {
     this.state = initialState;
     this.score = 0;
-    this.status = 'ready'; // 'playing' 'win' 'gameover'
+    this.status = GAME_STATUS.READY; // 'playing' 'win' 'gameover'
+    this.lastRandomTile = null;
   }
 
   getState() {
@@ -82,7 +90,7 @@ class Game {
   }
 
   start() {
-    this.status = 'playing';
+    this.status = GAME_STATUS.PLAYING;
     this.addRandomtile();
     this.addRandomtile();
     updateMessage('playing');
@@ -93,7 +101,7 @@ class Game {
       .fill(null)
       .map(() => Array(4).fill(0));
     this.score = 0;
-    this.status = 'ready';
+    this.status = GAME_STATUS.READY;
     updateMessage('ready');
   }
 
@@ -125,6 +133,8 @@ class Game {
         = emptyCell[Math.floor(Math.random() * emptyCell.length)];
 
       this.state[randomCell[0]][randomCell[1]] = Math.random() < 0.9 ? 2 : 4;
+
+      this.lastRandomTile = randomCell; // передивитись
     }
   }
 
@@ -149,7 +159,7 @@ class Game {
   }
 
   checkGameOver() {
-    if (this.state.flat().includes(2048)) {
+    if (this.state.flat().includes(TARGET_TILE)) {
       this.status = 'win';
 
       return;
@@ -167,7 +177,7 @@ class Game {
     });
 
     if (!hasEmptyCell && !canMerge) {
-      this.status = 'gameover';
+      this.status = GAME_STATUS.GAMEOVER;
       updateMessage('gameover');
     }
   }
@@ -192,6 +202,17 @@ function renderboard(state) {
 
     if (value > 0) {
       cell.classList.add(`field-cell--${value}`);
+    };
+
+    const row = Math.floor(index / 4);
+    const col = index % 4;
+
+    if (
+      game.lastRandomTile
+      && game.lastRandomTile[0] === row
+      && game.lastRandomTile[1] === col
+    ) {
+      cell.classList.add('tile-new');
     }
   });
 }
@@ -202,7 +223,7 @@ function updateUl() {
 
   const button = document.querySelector('.button');
 
-  if (game.getStatus() === 'ready') {
+  if (game.getStatus() === GAME_STATUS.READY) {
     button.textContent = 'Start';
     button.classList.remove('restart');
     button.classList.add('start');
@@ -245,19 +266,19 @@ function updateMessage(stat) {
 
 document.addEventListener('keydown', (en) => {
   switch (en.key) {
-    case 'ArrowLeft':
+    case KEYBOARD.LEFT:
       game.moveLeft();
       break;
 
-    case 'ArrowRight':
+    case KEYBOARD.RIGHT:
       game.moveRight();
       break;
 
-    case 'ArrowUp':
+    case KEYBOARD.UP:
       game.moveUp();
       break;
 
-    case 'ArrowDown':
+    case KEYBOARD.DOWN:
       game.moveDown();
       break;
 
@@ -269,7 +290,7 @@ document.addEventListener('keydown', (en) => {
 });
 
 document.querySelector('.start').addEventListener('click', (e) => {
-  if (game.getStatus() === 'ready') {
+  if (game.getStatus() === GAME_STATUS.READY) {
     game.start();
   } else {
     game.restart();
